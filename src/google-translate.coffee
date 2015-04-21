@@ -102,6 +102,11 @@ module.exports = (robot) ->
       })
       .header('User-Agent', 'Mozilla/5.0')
       .get() (err, res, body) ->
+        if err
+          msg.send "Failed to connect to GAPI"
+          robot.emit 'error', err
+          return
+
         try
           if body.length > 4 and body[0] == '['
             parsed = eval(body)
@@ -114,7 +119,8 @@ module.exports = (robot) ->
               else
                 msg.send "The #{language} #{term} translates as #{parsed} in #{languages[target]}"
           else
-            throw new SyntaxError 'Bad format'
+            throw new SyntaxError 'Invalid JS code'
 
-        catch e
-            msg.send "Failed to parse GAPI response: #{e.message}"
+        catch err
+          msg.send "Failed to parse GAPI response"
+          robot.emit 'error', err
