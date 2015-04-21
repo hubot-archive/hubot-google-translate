@@ -104,7 +104,7 @@ module.exports = (robot) ->
       .get() (err, res, body) ->
         if err
           msg.send "Failed to connect to GAPI"
-          robot.emit 'error', err
+          robot.emit 'error', err, res
           return
 
         try
