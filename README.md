@@ -18,6 +18,10 @@ Then add **hubot-google-translate** to your `external-scripts.json`:
 ]
 ```
 
+set the environment variable:
+
+`HUBOT_GOOGLE_TRANSLATE_API_KEY=YOUR_GOOGLE_API_KEY`
+
 ## Sample Interaction
 
 ```
