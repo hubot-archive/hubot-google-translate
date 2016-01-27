@@ -5,6 +5,8 @@
 #   hubot translate me <phrase> - Searches for a translation for the <phrase> and then prints that bad boy out.
 #   hubot translate me from <source> into <target> <phrase> - Translates <phrase> from <source> into <target>. Both <source> and <target> are optional
 
+API_KEY = process.env.HUBOT_GOOGLE_TRANSLATE_API_KEY
+
 languages =
   "af": "Afrikaans",
   "sq": "Albanian",
@@ -86,21 +88,13 @@ module.exports = (robot) ->
     origin = if msg.match[1] isnt undefined then getCode(msg.match[1], languages) else 'auto'
     target = if msg.match[2] isnt undefined then getCode(msg.match[2], languages) else 'en'
 
-    msg.http("https://translate.google.com/translate_a/single")
+    msg.http("https://www.googleapis.com/language/translate/v2")
       .query({
-        client: 't'
-        hl: 'en'
-        sl: origin
-        ssel: 0
-        tl: target
-        tsel: 0
+        key: API_KEY
+        source: origin
+        target: target
         q: term
-        ie: 'UTF-8'
-        oe: 'UTF-8'
-        otf: 1
-        dt: ['bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't', 'at']
       })
-      .header('User-Agent', 'Mozilla/5.0')
       .get() (err, res, body) ->
         if err
           msg.send "Failed to connect to GAPI"
@@ -108,18 +102,15 @@ module.exports = (robot) ->
           return
 
         try
-          if body.length > 4 and body[0] == '['
-            parsed = eval(body)
-            language = languages[parsed[2]]
-            parsed = parsed[0] and parsed[0][0] and parsed[0][0][0]
-            parsed and= parsed.trim()
-            if parsed
-              if msg.match[2] is undefined
-                msg.send "#{term} is #{language} for #{parsed}"
-              else
-                msg.send "The #{language} #{term} translates as #{parsed} in #{languages[target]}"
-          else
-            throw new SyntaxError 'Invalid JS code'
+          parsed = JSON.parse(body)
+          parsed = parsed.data.translations[0]
+          if parsed
+            language = languages[parsed.detectedSourceLanguage]
+            translated = parsed.translatedText
+            if msg.match[2] is undefined
+              msg.send "#{term} is #{language} for #{translated}"
+            else
+              msg.send "The #{language} #{term} translates as #{translated} in #{languages[target]}"
 
         catch err
           msg.send "Failed to parse GAPI response"
