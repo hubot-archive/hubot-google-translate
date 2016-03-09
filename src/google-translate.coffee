@@ -71,6 +71,70 @@ languages =
   "cy": "Welsh",
   "yi": "Yiddish"
 
+QL = (a) ->
+  ->
+    a
+RL = (a, b) ->
+  c = 0
+  Tb = "+"
+
+  while c < b.length - 2
+    d = b.charAt(c + 2)
+    d = (if d >= "a" then d.charCodeAt(0) - 87 else Number(d))
+    d = (if b.charAt(c + 1) is Tb then a >>> d else a << d)
+    a = (if b.charAt(c) is Tb then a + d & 4294967295 else a ^ d)
+    c += 3
+  a
+tk_c = (a) ->
+  b = undefined
+  SL = null
+  if null is SL
+    c = QL(String.fromCharCode(84))
+    b = QL(String.fromCharCode(75))
+    c = [ c(), c() ]
+    c[1] = b()
+    SL = 403352 # Number(window[c.join(b())]) || 0 if window["TKK"] == 0
+  b = SL
+  cb = "&"
+  k = ""
+  mf = "="
+  Vb = "+-a^+6"
+  Ub = "+-3^+b+-f"
+  t = "a"
+  Tb = "+"
+  dd = "."
+  d = QL(String.fromCharCode(116))
+  c = QL(String.fromCharCode(107))
+  d = [ d(), d() ]
+  d[1] = c()
+  c = cb + d.join(k) + mf
+  d = []
+  e = 0
+  f = 0
+
+  while f < a.length
+    g = a.charCodeAt(f)
+    (if 128 > g then d[e++] = g else ((if 2048 > g then d[e++] = g >> 6 | 192 else ((if 55296 is (g & 64512) and f + 1 < a.length and 56320 is (a.charCodeAt(f + 1) & 64512) then (g = 65536 + ((g & 1023) << 10) + (a.charCodeAt(++f) & 1023)
+    d[e++] = g >> 18 | 240
+    d[e++] = g >> 12 & 63 | 128
+    ) else d[e++] = g >> 12 | 224)
+    d[e++] = g >> 6 & 63 | 128
+    ))
+    d[e++] = g & 63 | 128
+    ))
+    f++
+  a = b or 0
+  e = 0
+  while e < d.length
+    a += d[e]
+    a = RL(a, Vb)
+    e++
+  a = RL(a, Ub)
+  0 > a and (a = (a & 2147483647) + 2147483648)
+  a %= 1e6
+  tk = (a.toString() + dd + (a ^ b))
+  tk
+
 getCode = (language,languages) ->
   for code, lang of languages
       return code if lang.toLowerCase() is language.toLowerCase()
@@ -99,6 +163,7 @@ module.exports = (robot) ->
         oe: 'UTF-8'
         otf: 1
         dt: ['bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't', 'at']
+        tk: tk_c(term)
       })
       .header('User-Agent', 'Mozilla/5.0')
       .get() (err, res, body) ->
@@ -119,7 +184,7 @@ module.exports = (robot) ->
               else
                 msg.send "The #{language} #{term} translates as #{parsed} in #{languages[target]}"
           else
-            throw new SyntaxError 'Invalid JS code'
+            throw new SyntaxError 'Invalid JS code #{body}'
 
         catch err
           msg.send "Failed to parse GAPI response"
