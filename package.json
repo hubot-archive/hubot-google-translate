@@ -1,7 +1,7 @@
 {
   "name": "hubot-google-translate",
   "description": "Allows Hubot to know many languages using Google Translate",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Josh Nichols <technicalpickles@github.com>",
   "license": "MIT",
   "keywords": "hubot, hubot-scripts, translate, translation, google translate",
