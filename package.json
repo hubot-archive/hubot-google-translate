@@ -12,7 +12,6 @@
   "bugs": {
     "url": "https://github.com/hubot-scripts/hubot-google-translate/issues"
   },
-  "dependencies": {},
   "peerDependencies": {
     "hubot": ">=2 <10 || 0.0.0-development"
   },
@@ -22,13 +21,14 @@
     "chai": "*",
     "sinon-chai": "*",
     "sinon": "*",
-    "grunt-mocha-test": "~0.7.0",
-    "grunt-release": "~0.6.0",
     "matchdep": "~0.1.2",
-    "grunt-contrib-watch": "~0.5.3"
+    "hubot-test-helper": "^1.4.4",
+    "coffee-script": "^1.10.0",
+    "bluebird": "^3.3.1",
+    "co": "^4.6.0"
   },
   "main": "index.coffee",
   "scripts": {
-    "test": "grunt test"
+    "test": "mocha --compilers coffee:coffee-script/register test"
   }
 }
