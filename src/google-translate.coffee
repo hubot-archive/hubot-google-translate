@@ -4,6 +4,7 @@
 # Commands:
 #   hubot translate me <phrase> - Searches for a translation for the <phrase> and then prints that bad boy out.
 #   hubot translate me from <source> into <target> <phrase> - Translates <phrase> from <source> into <target>. Both <source> and <target> are optional
+#   hubot pronounce <phrase> in <language> - Provides pronounciation of <phrase> (<language> is optional)
 
 languages =
   "af": "Afrikaans",
@@ -121,6 +122,49 @@ module.exports = (robot) ->
           else
             throw new SyntaxError 'Invalid JS code'
 
+        catch err
+          msg.send "Failed to parse GAPI response"
+          robot.emit 'error', err
+
+
+  pattern = new RegExp('pronounce ' +
+                       '(.*?)' +
+                       "(?: (?:in )?(#{language_choices}))?$", 'i')
+  robot.respond pattern, (msg) ->
+    term   = "\"#{msg.match[1]}\""
+    origin = if msg.match[2] isnt undefined then getCode(msg.match[2], languages) else 'auto'
+
+    if origin != 'auto'
+      msg.send "http://translate.google.com/translate_tts?ie=UTF-8&q=#{encodeURIComponent(term)}&tl=#{origin}"
+      return
+
+    msg.http("https://translate.google.com/translate_a/t")
+      .query({
+        client: 't'
+        hl: 'en'
+        multires: 1
+        sc: 1
+        sl: origin
+        ssel: 0
+        tl: 'en'
+        tsel: 0
+        uptl: "en"
+        text: term
+      })
+      .header('User-Agent', 'Mozilla/5.0')
+      .get() (err, res, body) ->
+        if err
+          msg.send "Failed to connect to GAPI"
+          robot.emit 'error', err, res
+          return
+
+        try
+          data   = body
+          if data.length > 4 and data[0] == '['
+            parsed = eval(data)
+            language =languages[parsed[2]]
+            parsed = parsed[0] and parsed[0][0] and parsed[0][0][0]
+            msg.send "http://translate.google.com/translate_tts?ie=UTF-8&q=#{encodeURIComponent(term)}&tl=#{getCode(language, languages)}"
         catch err
           msg.send "Failed to parse GAPI response"
           robot.emit 'error', err
